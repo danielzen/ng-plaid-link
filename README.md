@@ -1,45 +1,37 @@
-# NGX Plaid Link
+# Angular Plaid Link
 
-A wrapper component to make using Plaid Link easy in Angular 6+.
-
-_This has been tested to work in at least 1 Angular 5 app as well_
+A directive to make using Plaid Link easy in Angular.
 
 ## How to use
 
-#### 1a) Install from NPM
+#### 1) Install from NPM
 
 ```shell
-$ npm install ngx-plaid-link
+$ npm install ng-plaid-link
 ```
 
-#### 1b) Or Yarn
-
-```shell
-$ yarn add ngx-plaid-link
-```
-
-#### 2) Import the NgxPlaidLinkModule
+#### 2) Import the PlaidLinkModule
 
 ```typescript
 import { BrowserModule } from "@angular/platform-browser";
 import { NgModule } from "@angular/core";
 
 import { AppComponent } from "./app.component";
-import { NgxPlaidLinkModule } from "ngx-plaid-link";
+import { PlaidLinkModule } from "plaid-link";
 
 @NgModule({
   declarations: [AppComponent],
-  imports: [BrowserModule, NgxPlaidLinkModule],
+  imports: [BrowserModule, PlaidLinkModule],
   providers: [],
   bootstrap: [AppComponent]
 })
 export class AppModule {}
-```
+```    
 
-#### 3a) The easy way, with the provided button
+#### 3a) The easy way, the `zenPlaidLink` Directives
 
 ```html
-<mr-ngx-plaid-link-button
+<button zenPlaidLink
   env="sandbox"
   publicKey="YOURPUBLICKEY"
   institution=""
@@ -48,10 +40,8 @@ export class AppModule {}
   (Exit)="onPlaidExit($event)"
   (Load)="onPlaidLoad($event)"
   (Event)="onPlaidEvent($event)"
-  className="launch-plaid-link-button"
-  buttonText="Link Your Bank Account"
   (Click)="onPlaidClick($event)"
-></mr-ngx-plaid-link-button>
+>Link Your Bank Account</button>
 ```
 
 #### 3b) The less easy way, implement yourself
@@ -69,9 +59,9 @@ import {
   PlaidOnSuccessArgs,
   PlaidSuccessMetadata,
   PlaidConfig,
-  NgxPlaidLinkService,
+  PlaidLinkService,
   PlaidLinkHandler
-} from "ngx-plaid-link";
+} from "plaid-link";
 
 export class ComponentThatImplementsPlaidLink implements AfterViewInit {
   private plaidLinkHandler: PlaidLinkHandler;
@@ -83,11 +73,11 @@ export class ComponentThatImplementsPlaidLink implements AfterViewInit {
     token: null,
     webhook: "",
     product: ["auth"],
-    countryCodes: ['US', 'CA', 'GB']
+    countryCodes: ['US', 'CA', 'GB'],
     key: "YOURPUBLICKEY"
   };
 
-  constructor(private plaidLinkService: NgxPlaidLinkService) {}
+  constructor(private plaidLinkService: PlaidLinkService) {}
 
   // Create and open programatically once the library is loaded.
   ngAfterViewInit() {
@@ -154,6 +144,3 @@ This is all there in the types, but here they are for convenience.
 | Event          | output       | optional          | function | n/a                           | Passes the result from the onEvent function to your component                                                                       |
 | Load           | output       | optional          | function | n/a                           | Lets you act on the event when the Plaid Link stuff is all loaded                                                                   |
 
-## How to contribute
-
-Coming soon...

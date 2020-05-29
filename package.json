@@ -1,21 +1,49 @@
 {
-  "name": "ngx-plaid-link",
-  "version": "1.0.2",
-  "author": {
-    "name": "Mike Roberts",
-    "url": "https://mikeroberts.engineer"
+  "$schema": "./node_modules/ng-packagr/package.schema.json",
+  "name": "ng-plaid-link",
+  "description": "Angular Plaid Link Directive",
+  "version": "1.0.3",
+  "authors": [
+    {
+      "name": "Daniel Zen",
+      "url": "https://zen.digital"
+    },
+    {
+      "name": "Mike Roberts",
+      "url": "https://mikeroberts.engineer"
+    }
+  ],
+  "scripts": {
+    "build": "ng-packagr -p package.json",
+    "pack-dist": "npm pack ./dist/ng-plaid-link",
+    "publish-dist": "npm publish ./dist/ng-plaid-link"
+  },
+  "ngPackage": {
+    "dest": "./dist/ng-plaid-link",
+    "lib": {
+      "entryFile": "src/public_api.ts"
+    }
   },
   "license": "MIT",
-  "homepage": "https://github.com/mike-roberts/ngx-plaid-link",
+  "homepage": "https://github.com/danielzen/ng-plaid-link",
   "bugs": {
-    "url": "https://github.com/mike-roberts/ngx-plaid-link/issues"
+    "url": "https://github.com/danielzen/ng-plaid-link/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/mike-roberts/ngx-plaid-link"
+    "url": "https://github.com/angular/ng-plaid-link"
   },
   "peerDependencies": {
-    "@angular/common": "^8.0.0 || ^7.0.0 || ^6.0.0",
-    "@angular/core": "^8.0.0 || ^7.0.0 || ^6.0.0"
+    "@angular/common": "^9.0.0 || ^8.0.0 || ^7.0.0 || ^6.0.0",
+    "@angular/core": "^9.0.0 || ^8.0.0 || ^7.0.0 || ^6.0.0"
+  },
+  "devDependencies": {
+    "@angular/common": "^9.1.9",
+    "@angular/compiler": "^9.1.9",
+    "@angular/compiler-cli": "^9.1.9",
+    "@angular/core": "^9.1.9",
+    "@types/jasmine": "^3.5.10",
+    "ng-packagr": "^9.1.5",
+    "typescript": "~3.8.3"
   }
 }
