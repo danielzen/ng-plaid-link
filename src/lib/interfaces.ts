@@ -1,10 +1,24 @@
-export interface PlaidSuccessMetadata {
-  link_session_id: string;
-  institution: PlaidInstitutionObject;
-  account: PlaidAccountObject;
-  accounts: Array<PlaidAccountObject>;
-  account_id: string;
-  public_token: string;
+export interface PlaidConfig {
+  apiVersion?: string;
+  clientName: string;
+  product: PlaidProductType[];
+  accountSubtypes?: PlaidAccountSubtypes
+  key: string;
+  env: string;
+  onSuccess: Function;
+  onExit?: Function;
+  onEvent?: Function;
+  onLoad?: Function;
+  language?: PlaidSupportedLanguage
+  countryCodes?: PlaidSupportedCountry[];
+  webhook?: string;
+  token?: string;
+  isWebview?: boolean,
+  linkCustomizationName?: string,
+  oauthNonce?: string,
+  oauthRedirectUri?: string,
+  oauthStateId?: string,
+  paymentToken?: string
 }
 
 export interface PlaidOnSuccessArgs {
@@ -12,12 +26,21 @@ export interface PlaidOnSuccessArgs {
   metadata: PlaidSuccessMetadata;
 }
 
-export interface PlaidInstitutionObject {
+export interface PlaidSuccessMetadata {
+  link_session_id: string;
+  institution: PlaidInstitution;
+  account: PlaidAccount;
+  accounts: PlaidAccount[];
+  account_id: string;
+  public_token: string;
+}
+
+export interface PlaidInstitution {
   name: string;
   institution_id: string;
 }
 
-export interface PlaidAccountObject {
+export interface PlaidAccount {
   id: string;
   name: string;
   mask: string;
@@ -25,7 +48,7 @@ export interface PlaidAccountObject {
   subtype: string;
 }
 
-export interface PlaidErrorObject {
+export interface PlaidError {
   display_message: string;
   error_code: string;
   error_message: string;
@@ -34,12 +57,12 @@ export interface PlaidErrorObject {
 
 export interface PlaidErrorMetadata {
   link_session_id: string;
-  institution: PlaidInstitutionObject;
+  institution: PlaidInstitution;
   status: string;
 }
 
 export interface PlaidOnExitArgs {
-  error: PlaidErrorObject;
+  error: PlaidError;
   metadata: PlaidErrorMetadata;
 }
 
@@ -63,32 +86,108 @@ export interface PlaidEventMetadata {
   timestamp: string;
 }
 
-export enum PlaidCreditAccountSubtypes {
-  CreditCard = 'credit card',
-  PayPal = 'paypal'
+export interface PlaidAccountSubtypes {
+  investment?: PlaidInvestmentAccountSubtype[];
+  credit?: PlaidCreditAccountSubtype[];
+  depository?: PlaidDepositoryAccountSubtype[];
+  loan?: PlaidLoanAccountSubtype[];
+  other?: PlaidOtherAccountSubtype[];
 }
 
-export enum PlaidLoanAccountSubtypes {
-  Student = 'student'
-}
+export type PlaidSupportedLanguage = 'en' | 'fr' | 'es' | 'nl';
 
-export interface PlaidAccountTypes {
-  credit?: Array<PlaidCreditAccountSubtypes>;
-  loan?: Array<PlaidLoanAccountSubtypes>;
-}
+export type PlaidSupportedCountry = 'CA' | 'FR' | 'IE' | 'NL' | 'ES' | 'GB' | 'US'
 
-export interface PlaidConfig {
-  apiVersion?: string;
-  clientName?: string;
-  env: string;
-  key: string;
-  onLoad?: Function;
-  onSuccess: Function;
-  onExit: Function;
-  onEvent?: Function;
-  product: Array<string>;
-  token?: string;
-  webhook?: string;
-  countryCodes?: string[];
-  accountSubtypes?: PlaidAccountTypes
+export type PlaidProductType = 'transactions' |
+  'auth' |
+  'identity' |
+  'income' |
+  'assets' |
+  'investments' |
+  'liabilities' |
+  'payment_initiation'
+
+export type PlaidCreditAccountSubtype = 'credit card' | 'paypal';
+
+export type PlaidLoanAccountSubtype =
+  'auto' |
+  'commercial' |
+  'construction' |
+  'consumer' |
+  'home' |
+  'home equity' |
+  'loan' |
+  'mortgage' |
+  'overdraft' |
+  'line of credit' |
+  'student'
+
+// noinspection SpellCheckingInspection
+export type PlaidInvestmentAccountSubtype =
+  '401a' |
+  '401k' |
+  '403B' |
+  '457b' |
+  '529' |
+  'brokerage' |
+  'cash isa' |
+  'education savings account' |
+  'gic' |
+  'health reimbursement arrangement' |
+  'hsa' |
+  'isa' |
+  'ira' |
+  'lif' |
+  'lira' |
+  'lrif' |
+  'lrsp' |
+  'mutual fund' |
+  'non-taxable brokerage account' |
+  'other' |
+  'prif' |
+  'rdsp' |
+  'resp' |
+  'rlif' |
+  'rrif' |
+  'pension' |
+  'profit sharing plan' |
+  'retirement' |
+  'roth' |
+  'roth 401k' |
+  'rrsp' |
+  'sep ira' |
+  'simple ira' |
+  'sipp' |
+  'stock plan' |
+  'thrift savings plan' |
+  'tfsa' |
+  'trust' |
+  'ugma' |
+  'utma' |
+  'variable annuity'
+
+export type PlaidDepositoryAccountSubtype =
+  'cd' |
+  'checking' |
+  'hsa' |
+  'savings' |
+  'money market' |
+  'paypal' |
+  'prepaid'
+
+// noinspection SpellCheckingInspection
+export type PlaidOtherAccountSubtype =
+  'cash management' |
+  'keogh' |
+  'prepaid' |
+  'recurring' |
+  'rewards' |
+  'safe deposit' |
+  'sarsep' |
+  'other'
+
+// For future development:
+export interface PlaidLiabilityAccountType {
+  credit?: 'credit card' | 'paypal';
+  loan?: 'student'
 }

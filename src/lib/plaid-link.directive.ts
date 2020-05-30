@@ -2,12 +2,12 @@ import { Directive, EventEmitter, HostBinding, HostListener, Input, Output } fro
 import { PlaidLinkHandler } from './plaid-link-handler';
 import {
   PlaidErrorMetadata,
-  PlaidErrorObject,
+  PlaidError,
   PlaidEventMetadata,
   PlaidOnEventArgs,
   PlaidOnExitArgs,
   PlaidOnSuccessArgs,
-  PlaidSuccessMetadata
+  PlaidSuccessMetadata, PlaidProductType, PlaidSupportedCountry, PlaidAccountSubtypes, PlaidSupportedLanguage
 } from './interfaces';
 import { PlaidLinkService } from './plaid-link.service';
 
@@ -25,11 +25,10 @@ export interface ICustomWindow extends Window {
   selector: '[zenPlaidLink]'
 })
 export class PlaidLinkDirective {
-  @Output() Event: EventEmitter<PlaidOnEventArgs> = new EventEmitter();
-  @Output() Click: EventEmitter<any> = new EventEmitter();
-  @Output() Load: EventEmitter<any> = new EventEmitter();
-  @Output() Exit: EventEmitter<PlaidOnExitArgs> = new EventEmitter();
-  @Output() Success: EventEmitter<PlaidOnSuccessArgs> = new EventEmitter();
+  @Output() success: EventEmitter<PlaidOnSuccessArgs> = new EventEmitter();
+  @Output() exit: EventEmitter<PlaidOnExitArgs> = new EventEmitter();
+  @Output() event: EventEmitter<PlaidOnEventArgs> = new EventEmitter();
+  @Output() load: EventEmitter<any> = new EventEmitter();
 
   @Input() clientName: string;
   @Input() publicKey: string;
@@ -40,25 +39,31 @@ export class PlaidLinkDirective {
   private defaultProps = {
     apiVersion: "v2",
     env: "sandbox",
-    institution: null,
-    token: null,
     webhook: "",
-    product: ["auth"],
-    countryCodes: ["US"]
+    product: ["auth"] as PlaidProductType[],
+    countryCodes: ["US"] as PlaidSupportedCountry[]
   };
 
   @Input() apiVersion?: string = this.defaultProps.apiVersion;
+  @Input() product?: PlaidProductType[] = this.defaultProps.product as PlaidProductType[];
+  @Input() accountSubtypes?: PlaidAccountSubtypes;
   @Input() env?: string = this.defaultProps.env;
-  @Input() institution?: string = this.defaultProps.institution;
-  @Input() product?: Array<string> = this.defaultProps.product;
-  @Input() token?: string = this.defaultProps.token;
+  @Input() language?: PlaidSupportedLanguage;
+  @Input() countryCodes?: PlaidSupportedCountry[] = this.defaultProps.countryCodes;
   @Input() webhook?: string = this.defaultProps.webhook;
-  @Input() countryCodes?: string[] = this.defaultProps.countryCodes;
+  @Input() token?: string;
+  @Input() isWebView?: boolean;
+  @Input() linkCustomizationName?: string;
+  @Input() oauthNonce?: string;
+  @Input() oauthRedirectUri?: string;
+  @Input() oauthStateId?: string;
+  @Input() paymentToken?: string;
 
   constructor(private plaidLinkLoader: PlaidLinkService) {
     this.disabledButton = true;
   }
 
+  // noinspection JSUnusedGlobalSymbols
   get nativeWindow(): ICustomWindow {
     return getWindow();
   }
@@ -66,16 +71,17 @@ export class PlaidLinkDirective {
   async ngOnInit() {
     let handler: PlaidLinkHandler = await this.plaidLinkLoader
       .createPlaid({
-        env: this.env,
-        key: this.publicKey,
-        product: this.product,
         apiVersion: "v2",
         clientName: this.clientName,
-        countryCodes: this.countryCodes,
+        product: this.product,
+        accountSubtypes: this.accountSubtypes,
+        key: this.publicKey,
+        env: this.env,
         onSuccess: (public_token, metadata) => this.onSuccess(public_token, metadata),
         onExit: (err, metadata) => this.onExit(err, metadata),
         onEvent: (eventName, metadata) => this.onEvent(eventName, metadata),
         onLoad: () => this.onLoad(),
+        countryCodes: this.countryCodes,
         token: this.token || null,
         webhook: this.webhook || null
       });
@@ -83,29 +89,24 @@ export class PlaidLinkDirective {
     this.plaidLinkHandler = handler;
   }
 
-  public onExit(error: PlaidErrorObject, metadata: PlaidErrorMetadata) {
-    this.Exit.emit({error, metadata});
+  public onExit(error: PlaidError, metadata: PlaidErrorMetadata) {
+    this.exit.emit({error, metadata});
   }
 
   public onEvent(eventName: string, metadata: PlaidEventMetadata) {
-    this.Event.emit({eventName, metadata});
+    this.event.emit({eventName, metadata});
   }
 
   public onSuccess(token: string, metadata: PlaidSuccessMetadata) {
-    this.Success.emit({token, metadata});
-  }
-
-  @HostListener('click', ['$event'])
-  onClick($event) {
-    this.Click.emit($event);
-    // Open to a specific institution if necessary;
-    const institution = this.institution || null;
-    if (this.plaidLinkHandler) {
-      this.plaidLinkHandler.open(institution);
-    }
+    this.success.emit({token, metadata});
   }
 
   public onLoad($event = "link_loaded") {
-    this.Load.emit($event);
+    this.load.emit($event);
+  }
+
+  @HostListener('click')
+  onClick() {
+    if (this.plaidLinkHandler) this.plaidLinkHandler.open();
   }
 }

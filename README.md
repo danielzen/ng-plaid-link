@@ -1,8 +1,10 @@
 # Angular Plaid Link
 
-A directive to make using Plaid Link easy in Angular.
+### A directive to support Plaid Link in Angular.
+[Interfaces & Types](https://github.com/danielzen/ng-plaid-link/blob/master/src/lib/interfaces.ts) support [Plaid API](https://plaid.com/docs/) version: `2019-05-29` 
 
-## How to use
+Inspired by [ngx-plaid-link](https://www.npmjs.com/package/ngx-plaid-link) by [Mike Roberts](https://github.com/mike-roberts)
+### How to use
 
 #### 1) Install from NPM
 
@@ -13,11 +15,12 @@ $ npm install ng-plaid-link
 #### 2) Import the PlaidLinkModule
 
 ```typescript
-import { BrowserModule } from "@angular/platform-browser";
+import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from "@angular/core";
 
-import { AppComponent } from "./app.component";
-import { PlaidLinkModule } from "plaid-link";
+import { AppComponent } from './app.component';
+import { PlaidLinkModule } from 'ng-plaid-link';
+
 
 @NgModule({
   declarations: [AppComponent],
@@ -28,71 +31,61 @@ import { PlaidLinkModule } from "plaid-link";
 export class AppModule {}
 ```    
 
-#### 3a) The easy way, the `zenPlaidLink` Directives
+#### 3) add the `zenPlaidLink` Directives to an Element of your choice
 
 ```html
 <button zenPlaidLink
   env="sandbox"
   publicKey="YOURPUBLICKEY"
-  institution=""
-  [countryCodes]="['US', 'CA', 'GB']"
-  (Success)="onPlaidSuccess($event)"
-  (Exit)="onPlaidExit($event)"
-  (Load)="onPlaidLoad($event)"
-  (Event)="onPlaidEvent($event)"
-  (Click)="onPlaidClick($event)"
+  [countryCodes]="['US']"
+  (success)="onPlaidSuccess($event)"
+  (exit)="onPlaidExit($event)"
+  (load)="onPlaidLoad($event)"
+  (event)="onPlaidEvent($event)"
 >Link Your Bank Account</button>
 ```
 
-#### 3b) The less easy way, implement yourself
+#### Other options:
 
-Since most of the functionality is through the service you can imlpement this yourself to customize to your needs further.
+Note that most of the functionality is available through the `PlaidLinkService`, so you could implement functionality yourself if you wanted to customize further
 
 ```typescript
 import { Component, AfterViewInit } from "@angular/core";
 import {
-  PlaidErrorMetadata,
-  PlaidErrorObject,
-  PlaidEventMetadata,
-  PlaidOnEventArgs,
-  PlaidOnExitArgs,
-  PlaidOnSuccessArgs,
-  PlaidSuccessMetadata,
   PlaidConfig,
   PlaidLinkService,
   PlaidLinkHandler
-} from "plaid-link";
-
-export class ComponentThatImplementsPlaidLink implements AfterViewInit {
+} from "ng-plaid-link";
+                            
+@Component({
+  selector: 'app-plaid-component',
+  templateUrl: './plaid.component.html',
+  styleUrls: ['./plaid.component.scss'],
+})
+export class PlaidLinkComponent implements AfterViewInit {
   private plaidLinkHandler: PlaidLinkHandler;
 
   private config: PlaidConfig = {
     apiVersion: "v2",
     env: "sandbox",
-    institution: null,
-    token: null,
-    webhook: "",
     product: ["auth"],
-    countryCodes: ['US', 'CA', 'GB'],
+    countryCodes: ['US'],
     key: "YOURPUBLICKEY"
   };
 
   constructor(private plaidLinkService: PlaidLinkService) {}
 
-  // Create and open programatically once the library is loaded.
-  ngAfterViewInit() {
-    this.plaidLinkHandler
+  // Create and open programmatically once the library is loaded.
+  async ngAfterViewInit() {
+    this.plaidLinkHandler = await this.plaidLinkService
       .createPlaid(
-        Object.assign({}, config, {
+        Object.assign({}, this.config, {
           onSuccess: (token, metadata) => this.onSuccess(token, metadata),
           onExit: (error, metadata) => this.onExit(error, metadata),
           onEvent: (eventName, metadata) => this.onEvent(eventName, metadata)
         })
-      )
-      .then((handler: PlaidLinkHandler) => {
-        this.plaidLinkHandler = handler;
-        this.open();
-      });
+      );
+    this.open();
   }
 
   open() {
@@ -120,27 +113,30 @@ export class ComponentThatImplementsPlaidLink implements AfterViewInit {
 }
 ```
 
-#### Available Configuration
+#### Available Configuration Options
 
-This is all there in the types, but here they are for convenience.
+This mirrors Plaid's [Parameter reference](https://plaid.com/docs/#parameter-reference).
 
-| Attribute/prop | input/output | optional/required | Type     | Default                       | Description                                                                                                                         |
-| -------------- | ------------ | ----------------- | -------- | ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| apiVersion     | input        | optional          | string   | v2                            | The version of the Plaid Link api to use                                                                                            |
-| buttonText     | input        | optional          | string   | `Log In To Your Bank Account` | You can customize the text on the button by providing text here.                                                                    |
-| className      | input        | optional          | string   | null                          | A class or classes to apply to the button inside the component                                                                      |
-| clientName     | input        | required          | string   | null                          | The name of your application, gets used in the Plaid Link UI.                                                                       |
-| countryCodes   | input        | optional          | string[] | ['US']                        | An array of strings of [Plaid supported country codes](https://plaid.com/docs/faq/#does-plaid-support-international-bank-accounts-) |
-| env            | input        | optional          | string   | sandbox                       | Can be one of available plaid environments: `sandbox`, `development`, or `production`                                               |
-| institution    | input        | optional          | string   | null                          | If you want to launch a specific institution                                                                                        |
-| product        | input        | optional          | string[] | ['auth']                      | An array of the names of the products you'd like to authorize. Available options are `transactions`, `auth`, and `identity`.        |
-| publicKey      | input        | required          | string   | null                          | The public key from your Plaid account _Make sure it's the public key and not the private key_                                      |
-| style          | input        | optional          | object   | An object of styles           | An ngStyle object that can be used to apply styles and customize the plaid link button to match your app.                           |
-| token          | input        | optional          | string   | null                          | You can provide a token if you are re-authenticating or updating an item that has previously been linked.                           |
-| webhook        | input        | optional          | string   | null                          | You can provide a webhook for each item that Plaid will send events to.                                                             |
-| Exit           | output       | required          | function | n/a                           | Passes the result from the onExit function to your component                                                                        |
-| Success        | output       | required          | function | n/a                           | Passes the result from the onSuccess function to your component                                                                     |
-| Click          | output       | optional          | function | n/a                           | Lets you act on the event when the button is clicked                                                                                |
-| Event          | output       | optional          | function | n/a                           | Passes the result from the onEvent function to your component                                                                       |
-| Load           | output       | optional          | function | n/a                           | Lets you act on the event when the Plaid Link stuff is all loaded                                                                   |
+| Attribute/prop         | input/output | optional/required | Type                    | Default                       | Description                                                                                                                         |
+| --------------         | ------------ | ----------------- | --------                | ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| apiVersion             | input        | optional          | string                  | v2                            | The version of the Plaid Link api to use                                                                                            |
+| clientName             | input        | required          | string                  | null                          | The name of your application, gets used in the Plaid Link UI.                                                                       |
+| product                | input        | optional          | PlaidProductType[]      | ['auth']                      | An array of the names of the products you'd like to authorize. Available options are `transactions`, `auth`, and `identity`.        |
+| accountSubtypes        | input        | optional          | PlaidAccountSubtypes    | null                          | Filtering Accounts and Institutions by Account Subtype                                                                    |
+| publicKey              | input        | required          | string                  | null                          | The public key from your Plaid account _Make sure it's the public key and not the private key_                                      |
+| env                    | input        | optional          | string                  | sandbox                       | Can be one of available plaid environments: `sandbox`, `development`, or `production`                                               |
+| success                | output       | required          | function                | n/a                           | Passes the result from the onSuccess function to your component                                                                     |
+| exit                   | output       | required          | function                | n/a                           | Passes the result from the onExit function to your component                                                                        |
+| event                  | output       | optional          | function                | n/a                           | Passes the result from the onEvent function to your component                                                                       |
+| load                   | output       | optional          | function                | n/a                           | Lets you act on the event once Plaid Link library is all loaded                                                                     |
+| language               | input        | optional          | PlaidSupportedLanguage  | en                            | Specify a Plaid-supported language to localize Link. English will be used by default.                                               |
+| countryCodes           | input        | optional          | PlaidSupportedCountry[] | ['US']                        | An array of strings of [Plaid supported country codes](https://plaid.com/docs/faq/#does-plaid-support-international-bank-accounts-) |
+| webhook                | input        | optional          | string                  | null                          | You can provide a webhook for each item that Plaid will send events to.                                                             |
+| token                  | input        | optional          | string                  | null                          | You can provide a token if you are re-authenticating or updating an item that has previously been linked.                           |
+| isWebview              | input        | optional          | boolean                 | null                          | Set to true if launching Link within a WebView                                                                                      |
+| linkCustomizationName  | input        | optional          | string                  | null                          | You can provide a webhook for each item that Plaid will send events to.                                                             |
+| oauthNonce             | input        | optional          | string                  | null                          | An oauthNonce is required to support OAuth authentication flows when launching or re-launching Link on a mobile device              |
+| oauthRedirectUri       | input        | optional          | string                  | null                          | An oauthRedirectUri is required to support OAuth authentication flows when launching Link on a mobile device                        |
+| oauthStateId           | input        | optional          | string                  | null                          | An oauthStateId is required to support OAuth authentication flows when re-launching Link on a mobile device                         |
+| paymentToken           | input        | optional          | string                  | null                          | A paymentToken must be specified if you are using the payment_initiation product.                                                   |
 
