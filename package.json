@@ -2,7 +2,7 @@
   "$schema": "./node_modules/ng-packagr/package.schema.json",
   "name": "ng-plaid-link",
   "description": "Angular Plaid Link Directive",
-  "version": "2.0.0",
+  "version": "2.0.2",
   "authors": [
     {
       "name": "Daniel Zen",
@@ -34,16 +34,16 @@
     "url": "https://github.com/danielzen/ng-plaid-link"
   },
   "peerDependencies": {
-    "@angular/common": "^9.0.0 || ^8.0.0 || ^7.0.0 || ^6.0.0",
-    "@angular/core": "^9.0.0 || ^8.0.0 || ^7.0.0 || ^6.0.0"
+    "@angular/common": "^13.0.0 || ^12.0.0 || ^11.0.0 ||  ^10.0.0 || ^9.0.0 || ^8.0.0 || ^7.0.0 || ^6.0.0",
+    "@angular/core": "^13.0.0 || ^12.0.0 || ^11.0.0 ||  ^10.0.0 || ^9.0.0 || ^8.0.0 || ^7.0.0 || ^6.0.0"
   },
   "devDependencies": {
-    "@angular/common": "^9.1.9",
-    "@angular/compiler": "^9.1.9",
-    "@angular/compiler-cli": "^9.1.9",
-    "@angular/core": "^9.1.9",
-    "@types/jasmine": "^3.5.10",
-    "ng-packagr": "^9.1.5",
-    "typescript": "~3.8.3"
+    "@angular/common": "^10.2.5",
+    "@angular/compiler": "^10.2.5",
+    "@angular/compiler-cli": "^10.2.5",
+    "@angular/core": "^10.2.5",
+    "@types/jasmine": "^3.10.2",
+    "ng-packagr": "^10.1.1",
+    "typescript": "~3.9.4"
   }
 }
